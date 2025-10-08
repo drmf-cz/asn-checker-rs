@@ -1,0 +1,8 @@
+[package]
+name = "asn-checker-rs"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+http-cache = "0.21.0"
+reqwest = "0.12.23"
