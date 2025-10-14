@@ -2,7 +2,7 @@
 
 A Rust library for looking up Autonomous System Numbers (ASN) and related information for IPv4 and IPv6 addresses.
 It fetches, parses, and caches ASN and IP mapping data from public sources, providing fast and convenient lookups for network applications.
-Library was inspired by [asn-checker]("https://github.com/ArcHound/asn-check").
+Library was inspired by [asn-checker](https://github.com/ArcHound/asn-check).
 
 ## Features
 - Lookup ASN information for IPv4 and IPv6 addresses
