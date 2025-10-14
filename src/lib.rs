@@ -1,78 +1,82 @@
-use std::{error::Error, net::IpAddr, str::FromStr};
-use std::collections::BTreeMap;
-use reqwest;
-use http_cache;
+mod checker;
+use crate::checker::Checker;
+mod structs;
+mod misc;
 
-// Links to current data on the internet
-const ASN_IPV4: &str = "https://thyme.apnic.net/current/data-raw-table";
-const ASN_IPV6: &str = "https://thyme.apnic.net/current/ipv6-raw-table";
-const AS_NAMES: &str = "https://ftp.ripe.net/ripe/asnames/asn.txt";
+use crate::structs::{IpInfo, ASN};
+use tokio::sync::OnceCell;
 
-#[derive(Debug, Clone, PartialEq, Eq)]
-struct IpInfo {
-    ip: IpAddr,
-    asn: ASN
+use std::{net::IpAddr, str::FromStr};
+use reqwest_middleware::{Result, ClientWithMiddleware};
+use ipnet::IpNet;
+
+static CHECKER: OnceCell<Checker> = OnceCell::const_new();
+
+async fn get_checker() -> &'static Checker {
+    CHECKER.get_or_init(|| async {
+        let mut checker = Checker::new();
+        checker.init().await;
+        checker
+    }).await
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
-struct ASN {
-    id: u32,
-    name: String,
-    cc: String
-}
-
-struct Checker {
-    db: BTreeMap<IpAddr, ASN>,
-}
-
-impl Checker {
-    fn new() -> Self {
-        let db = BTreeMap::new();
-        Checker { db }
-    }
-}
-
-impl Checker {
-    fn init() -> Result<(), Box<dyn Error>> {
-        // download and parse the ASN database
-
-
-        Ok(())
-    }
-}
-
-impl Checker {
-    fn search(&self, ip: &IpAddr) -> Option<IpInfo> {
-        let Some(asn_info) = self.db.get(ip) else {
-            return None;
-        };
-        let result = IpInfo {
-            ip: *ip,
-            asn: asn_info.clone()
-        };
-        Some(result)
-    }
-}
-
-
-pub fn check(address: IpAddr) -> Result<IpInfo, Box<dyn Error>> {
-    let result: IpInfo = IpInfo {
-        ip: address,
-        asn: 0,
-        name: String::from_str("asdf")?,
-
-        cc: String::from_str("cz")?
-    };
-    Ok(result)
+pub async fn check(address: IpAddr) -> Option<IpInfo> {
+    let mut checker = Checker::new();
+    checker.init().await;
+    let r = checker.search(&address).await;
+    r
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    #[test]
-    fn it_works() {
-        let _ = check(IpAddr::from_str("127.0.0.1").unwrap());
-        assert_eq!(4, 4);
+    async fn verify_ip_data(ip: &IpAddr, net: &IpNet, real: &IpInfo) -> Result<_> {
+        let checker = get_checker().await;
+
+        // Get the data from the internet
+        let Some(found) = checker.search(ip).await else {
+            panic!("Not found");
+        };
+        assert_eq!(found, *real);
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn check_ipv4() {
+        // Set valid input
+        let cfn_ip = IpAddr::from_str("1.1.1.1").unwrap();
+        let cfn_net = IpNet::from_str("1.1.1.0/24").unwrap();
+
+        let real = IpInfo {
+            ip: Some(cfn_ip),
+            net: cfn_net,
+            asn: ASN {
+                id: 13335,
+                name: "CLOUDFLARENET,".to_string(),
+                cc: "US".to_string()
+            }
+        };
+
+        let _ = verify_ip_data(&cfn_ip, &cfn_net, &real).await;
+    }
+
+    #[tokio::test]
+    async fn check_ipv6() {
+        // Set valid input
+        let cfn_ip = IpAddr::from_str("2001:678:19c::1").unwrap();
+        let cfn_net = IpNet::from_str("2001:678:19c::/48").unwrap();
+
+        let real = IpInfo {
+            ip: Some(cfn_ip),
+            net: cfn_net,
+            asn: ASN {
+                id: 13335,
+                name: "CLOUDFLARENET,".to_string(),
+                cc: "US".to_string()
+            }
+        };
+
+        let _ = verify_ip_data(&cfn_ip, &cfn_net, &real).await;
     }
 }
