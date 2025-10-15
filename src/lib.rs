@@ -23,15 +23,14 @@ async fn get_checker() -> &'static Checker {
 pub async fn check(address: IpAddr) -> Option<IpInfo> {
     let mut checker = Checker::new();
     checker.init().await;
-    let r = checker.search(&address).await;
-    r
+    checker.search(&address).await
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    async fn verify_ip_data(ip: &IpAddr, net: &IpNet, real: &IpInfo) -> Result<_> {
+    async fn verify_ip_data(ip: &IpAddr, real: &IpInfo) -> Result<()> {
         let checker = get_checker().await;
 
         // Get the data from the internet
@@ -58,7 +57,7 @@ mod tests {
             }
         };
 
-        let _ = verify_ip_data(&cfn_ip, &cfn_net, &real).await;
+        let _ = verify_ip_data(&cfn_ip, &real).await;
     }
 
     #[tokio::test]
@@ -77,6 +76,6 @@ mod tests {
             }
         };
 
-        let _ = verify_ip_data(&cfn_ip, &cfn_net, &real).await;
+        let _ = verify_ip_data(&cfn_ip, &real).await;
     }
 }

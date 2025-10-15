@@ -1,4 +1,4 @@
-use std::collections::{BTreeMap, HashMap};
+use std::collections::{HashMap};
 use std::error::Error;
 use std::net::IpAddr;
 use std::path::PathBuf;
@@ -87,7 +87,7 @@ impl Checker {
             if parts.len() < 3 {
                 return None;
             }
-            let id = parts.get(0)?;
+            let id = parts.first()?;
             let name = parts.get(1)?;
             let cc = parts.get(2)?;
             Some(ASN {
@@ -110,10 +110,14 @@ impl Checker {
             if net.contains(ip) {
                 println!("Found IP {} with asn {:?}", ip, ipinfo);
                 let mut result = ipinfo.clone();
-                result.ip = Some(ip.clone());
+                result.ip = Some(*ip);
                 return Some(result);
             }
         }
         None
+    }
+
+    pub fn get_asn(&self, asn_id: u32) -> Option<&ASN> {
+        self.asn.get(&asn_id)
     }
 }
