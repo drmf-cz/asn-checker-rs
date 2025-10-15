@@ -1,7 +1,16 @@
 [package]
 name = "asn-checker-rs"
+authors = ["Marek Tamaskovic"]
 version = "0.1.0"
 edition = "2024"
+description = "Get ASN info about IP"
+readme = "README.md"
+homepage = "https://github.com/drmf-cz/asn-checker-rs"
+repository = "https://github.com/drmf-cz/asn-checker-rs"
+license = "MIT"
+license-file = "LICENSE"
+keywords = ["asn", "ip"]
+categories = ["network-programming"]
 
 [dependencies]
 http-cache-reqwest = "0.16.0"
