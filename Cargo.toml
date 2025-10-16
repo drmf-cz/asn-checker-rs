@@ -1,5 +1,5 @@
 [package]
-name = "asn-checker-rs"
+name = "asnLookup-rs"
 authors = ["Marek Tamaskovic"]
 version = "0.1.0"
 edition = "2024"
@@ -7,12 +7,32 @@ description = "Get ASN info about IP"
 readme = "README.md"
 homepage = "https://github.com/drmf-cz/asn-checker-rs"
 repository = "https://github.com/drmf-cz/asn-checker-rs"
-license = "MIT"
 license-file = "LICENSE"
 keywords = ["asn", "ip"]
 categories = ["network-programming"]
 
+[workspace]
+resolver = "3"
+members = [
+	"lib/asnLookup",
+	"bin/asnLooker-cli",
+	"bin/asnLooker-tui",
+]
+
+[lib]
+name = "asnLookup"
+path = "lib/asnLookup/src/lib.rs"
+
+[[bin]]
+name = "asnLooker-cli"
+path = "bin/asnLooker-cli/src/main.rs"
+
+[[bin]]
+name = "asnLooker-tui"
+path = "bin/asnLooker-tui/src/main.rs"
+
 [dependencies]
+clap = { version = "4.5.49", features = ["derive"] }
 http-cache-reqwest = "0.16.0"
 ipnet = { version = "2", features = ["serde"]  }
 reqwest = "0.12.23"

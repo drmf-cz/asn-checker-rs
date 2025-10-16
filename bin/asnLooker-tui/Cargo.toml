@@ -1,0 +1,8 @@
+[package]
+name = "asnLooker-tui"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+asnLookup = { path = "../../lib/asnLookup" }
+tokio = "1.48.0"

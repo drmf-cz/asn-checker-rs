@@ -1,14 +1,14 @@
-mod checker;
-use crate::checker::Checker;
 mod structs;
 mod misc;
+pub mod checker;
 
-use crate::structs::{IpInfo, ASN};
 use tokio::sync::OnceCell;
-
 use std::{net::IpAddr, str::FromStr};
 use reqwest_middleware::{Result, ClientWithMiddleware};
 use ipnet::IpNet;
+
+use crate::structs::{IpInfo, ASN};
+use crate::checker::Checker;
 
 static CHECKER: OnceCell<Checker> = OnceCell::const_new();
 
